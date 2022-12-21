@@ -1,9 +1,9 @@
 class EventConfig {
-  final String className;
+  final String commandClassName;
   final String paramsClassName;
 
   EventConfig({
-    required this.className,
+    required this.commandClassName,
     required this.paramsClassName,
   });
 }

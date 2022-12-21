@@ -29,11 +29,12 @@ class ExtensionGenerator extends GeneratorForAnnotation<EventSync> {
     classBuffer.writeln('@override');
     classBuffer.writeln('final Map<String, Command> commandsMap = {');
     // TODO: this isn't repetitive and inefficient, but it works for now.
-    for (var entry in events) {
-      var eventReader = ConstantReader(entry);
+    for (var i = 0; i < events.length; i ++) {
+      final entry = events[i];
+      final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      final String eventName = event.className.snakeCase;
-      classBuffer.writeln("'$eventName': ${event.className}(),");
+      final String eventName = event.commandClassName.snakeCase;
+      // classBuffer.writeln("'$eventName': ${visitor.className}.events,");
     }
     classBuffer.writeln('};');
     classBuffer.writeln('}');
@@ -43,12 +44,12 @@ class ExtensionGenerator extends GeneratorForAnnotation<EventSync> {
     for (var entry in events) {
       var eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      final String eventName = event.className.snakeCase;
+      final String eventName = event.commandClassName.snakeCase;
       if (eventNames.contains(eventName)) {
-        throw Exception('Duplicate event $eventName. You tried registering the event command ${event.className} more than once.');
+        throw Exception('Duplicate event $eventName. You tried registering the event command ${event.commandClassName} more than once.');
       }
       eventNames.add(eventName);
-      final String eventClassName = '${event.className}Event';
+      final String eventClassName = '${event.commandClassName}Event';
 
       classBuffer.writeln(
           'class $eventClassName extends EventInfo<${event.paramsClassName}> {');
@@ -80,19 +81,23 @@ class ExtensionGenerator extends GeneratorForAnnotation<EventSync> {
   }
 
   EventConfig resolveEvent(ConstantReader eventReader) {
-    final command = eventReader.peek('command')?.typeValue;
+    final command = eventReader.read('command').objectValue;
+    final commandType = command.type;
+    // final command = eventReader.peek('command')?.typeValue;
 
-    if (command == null) {
-      throw Exception('Event must have a command');
+    if (commandType == null) {
+      throw Exception('Unknown command type');
     }
 
-    final className = command.getDisplayString(withNullability: false);
-    final genericClassType = getCommandParamType(command);
+    final className = commandType.getDisplayString(
+        withNullability:
+            false);
+    final genericClassType = getCommandParamType(commandType);
     final paramsClassName =
         genericClassType.getDisplayString(withNullability: false);
 
     return EventConfig(
-      className: className,
+      commandClassName: className,
       paramsClassName: paramsClassName,
     );
   }
