@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
-import 'package:event_sync_generator/src/model_visitor.dart';
+import 'package:event_sync_generator/src/event_model_visitor.dart';
 import 'package:event_sync_generator/src/models/event_config.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
@@ -16,7 +16,7 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
   FutureOr<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
     final classBuffer = StringBuffer();
-    final visitor = ModelVisitor();
+    final visitor = EventModelVisitor();
     element.visitChildren(visitor);
 
     // generate event class
@@ -26,7 +26,8 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
 
     // prevent duplicate event names
     if (eventNames.contains(eventName)) {
-      throw Exception('Duplicate event $eventName.');
+      throw Exception(
+          "Duplicate event '$eventName'. Each event must have a unique name.");
     }
     eventNames.add(eventName);
 
@@ -40,6 +41,12 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
     classBuffer.writeln('data: params,');
     classBuffer.writeln(');');
     classBuffer.writeln('}');
+
+    // extend the event handler
+    // classBuffer.writeln('extension ${visitor.className}Extension on ${visitor.className} {');
+    // classBuffer.writeln('@override');
+    // classBuffer.writeln("String get name => '$eventName';");
+    // classBuffer.writeln('}');
     return classBuffer.toString();
   }
 

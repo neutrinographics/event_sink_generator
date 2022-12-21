@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
-import 'package:event_sync_generator/src/model_visitor.dart';
+import 'package:event_sync_generator/src/event_model_visitor.dart';
 import 'package:event_sync_generator/src/models/event_config.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
@@ -13,7 +13,7 @@ class ExtensionGenerator extends GeneratorForAnnotation<EventSync> {
   @override
   FutureOr<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
-    final visitor = ModelVisitor();
+    final visitor = EventModelVisitor();
     element.visitChildren(visitor);
     final events = annotation.read('events').listValue;
 
@@ -66,19 +66,7 @@ class ExtensionGenerator extends GeneratorForAnnotation<EventSync> {
     return classBuffer.toString();
   }
 
-  void generateGettersAndSetters(
-      ModelVisitor visitor, StringBuffer classBuffer) {
-    for (final field in visitor.fields.keys) {
-      final variable =
-          field.startsWith('_') ? field.replaceFirst('_', '') : field;
 
-      classBuffer.writeln(
-          "${visitor.fields[field]} get $variable => variables['$variable'];");
-
-      classBuffer.writeln('set $variable(${visitor.fields[field]} $variable)');
-      classBuffer.writeln('=> $field = $variable;');
-    }
-  }
 
   EventConfig resolveEvent(ConstantReader eventReader) {
     final command = eventReader.read('command').objectValue;
