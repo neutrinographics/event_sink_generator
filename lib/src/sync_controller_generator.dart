@@ -28,6 +28,7 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
     final managerName = visitor.className.replaceFirst('\$', '');
     classBuffer.writeln('class $managerName extends EventSyncBase {');
     classBuffer.writeln('$managerName() : super();');
+    // generate handler map
     classBuffer.writeln('@override');
     classBuffer.writeln('final Map<String, EventHandler> eventHandlersMap = {');
     // TODO: this is repetitive and inefficient, but it works for now.
@@ -39,6 +40,19 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
       classBuffer.writeln("'$eventName': const ${event.commandClassName}(),");
     }
     classBuffer.writeln('};');
+    // generate params map
+    classBuffer.writeln('@override');
+    classBuffer.writeln('final Map<String, EventParamsGenerator> eventParamsGeneratorMap = {');
+    // TODO: this is repetitive and inefficient, but it works for now.
+    for (var i = 0; i < events.length; i++) {
+      final entry = events[i];
+      final eventReader = ConstantReader(entry);
+      EventConfig event = resolveEvent(eventReader);
+      final String eventName = event.commandClassName.snakeCase;
+      classBuffer.writeln("'$eventName': (Map<String, dynamic> json) => ${event.paramsClassName}.fromJson(json),");
+    }
+    classBuffer.writeln('};');
+
     classBuffer.writeln('}');
 
     // generate event types
