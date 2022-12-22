@@ -13,7 +13,7 @@ targets:
 builders:
   events:
     import: "package:event_sync_generator/builder.dart"
-    builder_factories: ["generateEvents", "generateSyncManager"]
+    builder_factories: ["generateSyncManager"]
     build_extensions: {".dart": [".event.g.part"]}
     auto_apply: dependents
     build_to: cache
