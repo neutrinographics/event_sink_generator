@@ -27,6 +27,7 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
     }
     final managerName = visitor.className.replaceFirst('\$', '');
     classBuffer.writeln('class $managerName extends EventSyncBase {');
+    classBuffer.writeln('$managerName() : super();');
     classBuffer.writeln('@override');
     classBuffer.writeln('final Map<String, EventHandler> eventHandlersMap = {');
     // TODO: this is repetitive and inefficient, but it works for now.
