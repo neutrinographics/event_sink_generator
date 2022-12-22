@@ -31,6 +31,7 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
     }
     eventNames.add(eventName);
 
+    classBuffer.writeln();
     classBuffer.writeln(
         'class $eventClassName extends EventInfo<${visitor.paramsClassName}> {');
     classBuffer.writeln(

@@ -2,18 +2,18 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
-import 'package:event_sync_generator/src/event_model_visitor.dart';
+import 'package:event_sync_generator/src/model_visitor.dart';
 import 'package:event_sync_generator/src/models/event_config.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'package:event_sync/event_sync.dart';
 
-class ExtensionGenerator extends GeneratorForAnnotation<EventSync> {
+class SyncManagerGenerator extends GeneratorForAnnotation<EventSync> {
   @override
   FutureOr<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
-    final visitor = EventModelVisitor();
+    final visitor = ModelVisitor();
     element.visitChildren(visitor);
     final events = annotation.read('events').listValue;
 

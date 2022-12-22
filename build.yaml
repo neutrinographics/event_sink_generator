@@ -14,7 +14,7 @@ builders:
   events:
 #    target: ":event_sync_generator"
     import: "package:event_sync_generator/builder.dart"
-    builder_factories: ["generateEvents"]
+    builder_factories: ["generateEvents", "generateSyncManager"]
     build_extensions: {".dart": [".event.g.part"]}
     auto_apply: dependents
     build_to: cache
