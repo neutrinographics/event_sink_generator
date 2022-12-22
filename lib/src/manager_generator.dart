@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:glob/glob.dart';
 import 'package:source_gen/source_gen.dart';
 
 // https://stackoverflow.com/questions/56972823/dart-build-runner-generate-one-dart-file-with-content
@@ -11,6 +13,7 @@ class ManagerGenerator implements Builder {
 
     final events = buildStep.findAssets(Glob('**/*.event.g.dart'));
     await for (var exportedLibrary in events) {
+      // final eventName = exportedLibrary.pathSegments.last;
       final library = await buildStep.inputLibrary;
       final reader = LibraryReader(library);
       classBuilder.writeln(
