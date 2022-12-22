@@ -5,6 +5,7 @@ import 'package:source_gen/source_gen.dart';
 
 import 'package:event_sync/event_sync.dart';
 
+@Deprecated('This has not been implemented yet')
 class ParamsGenerator extends GeneratorForAnnotation<EventSerializable> {
   @override
   FutureOr<String> generateForAnnotatedElement(

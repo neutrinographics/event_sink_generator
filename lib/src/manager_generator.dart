@@ -1,25 +1,23 @@
 import 'dart:async';
 
-import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:glob/glob.dart';
-import 'package:source_gen/source_gen.dart';
 
 // https://stackoverflow.com/questions/56972823/dart-build-runner-generate-one-dart-file-with-content
+@Deprecated('Use SyncManagerGenerator instead')
 class ManagerGenerator implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     final classBuilder = StringBuffer();
 
-    final events = buildStep.findAssets(Glob('**/*.event.g.dart'));
-    await for (var exportedLibrary in events) {
-      // final eventName = exportedLibrary.pathSegments.last;
-      final library = await buildStep.inputLibrary;
-      final reader = LibraryReader(library);
-      classBuilder.writeln(
-          '// ${reader.classes.first.getDisplayString(withNullability: false)}');
-      // TODO: read the event information
-    }
+    // final events = buildStep.findAssets(Glob('**/*.event.g.dart'));
+    // await for (var exportedLibrary in events) {
+    //   // final eventName = exportedLibrary.pathSegments.last;
+    //   final library = await buildStep.inputLibrary;
+    //   final reader = LibraryReader(library);
+    //   classBuilder.writeln(
+    //       '// ${reader.classes.first.getDisplayString(withNullability: false)}');
+    //   // TODO: read the event information
+    // }
 
     classBuilder.writeln('// hello world!');
 

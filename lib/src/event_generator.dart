@@ -9,6 +9,8 @@ import 'package:source_gen/source_gen.dart';
 
 import 'package:event_sync/event_sync.dart';
 
+/// Generates individual event classes
+@Deprecated('Use the SyncManagerGenerator instead')
 class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
   final List<String> eventNames = [];
 

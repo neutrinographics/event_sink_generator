@@ -9,7 +9,8 @@ import 'package:source_gen/source_gen.dart';
 
 import 'package:event_sync/event_sync.dart';
 
-class SyncManagerGenerator extends GeneratorForAnnotation<EventSync> {
+/// Generates a new sync controller.
+class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
   @override
   FutureOr<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
@@ -29,7 +30,7 @@ class SyncManagerGenerator extends GeneratorForAnnotation<EventSync> {
     classBuffer.writeln('@override');
     classBuffer.writeln('final Map<String, EventHandler> eventHandlersMap = {');
     // TODO: this is repetitive and inefficient, but it works for now.
-    for (var i = 0; i < events.length; i ++) {
+    for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
@@ -46,7 +47,8 @@ class SyncManagerGenerator extends GeneratorForAnnotation<EventSync> {
       EventConfig event = resolveEvent(eventReader);
       final String eventName = event.commandClassName.snakeCase;
       if (eventNames.contains(eventName)) {
-        throw Exception('Duplicate event $eventName. You tried registering the event command ${event.commandClassName} more than once.');
+        throw Exception(
+            'Duplicate event $eventName. You tried registering the event command ${event.commandClassName} more than once.');
       }
       eventNames.add(eventName);
       final String eventClassName = '${event.commandClassName}Event';
@@ -66,10 +68,7 @@ class SyncManagerGenerator extends GeneratorForAnnotation<EventSync> {
     return classBuffer.toString();
   }
 
-
-
   EventConfig resolveEvent(ConstantReader eventReader) {
-
     final command = eventReader.read('handler').objectValue;
     final commandType = command.type;
     // final command = eventReader.peek('command')?.typeValue;
@@ -78,9 +77,7 @@ class SyncManagerGenerator extends GeneratorForAnnotation<EventSync> {
       throw Exception('Missing event handler type');
     }
 
-    final className = commandType.getDisplayString(
-        withNullability:
-            false);
+    final className = commandType.getDisplayString(withNullability: false);
     final genericClassType = getCommandParamType(commandType);
     final paramsClassName =
         genericClassType.getDisplayString(withNullability: false);

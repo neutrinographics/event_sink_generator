@@ -2,6 +2,8 @@ name: event_sync_generator
 description: A new Flutter package project.
 version: 0.0.1
 homepage:
+# TODO: remove this once we deploy this
+publish_to: none
 
 environment:
   sdk: '>=2.18.5 <3.0.0'
@@ -12,12 +14,11 @@ dependencies:
   flutter:
     sdk: flutter
   source_gen: ^1.2.6
-  event_sync:
-    path: ../event_sync/
   build_config: ^1.1.1
   analyzer: ^4.7.0
   recase: ^4.1.0
-  glob: ^2.1.1
+  event_sync:
+    path: ../event_sync/
 
 dev_dependencies:
   flutter_test:
