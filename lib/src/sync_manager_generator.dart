@@ -27,14 +27,14 @@ class SyncManagerGenerator extends GeneratorForAnnotation<EventSync> {
     final managerName = visitor.className.replaceFirst('\$', '');
     classBuffer.writeln('class $managerName extends EventSyncBase {');
     classBuffer.writeln('@override');
-    classBuffer.writeln('final Map<String, Command> commandsMap = {');
-    // TODO: this isn't repetitive and inefficient, but it works for now.
+    classBuffer.writeln('final Map<String, EventHandler> eventHandlersMap = {');
+    // TODO: this is repetitive and inefficient, but it works for now.
     for (var i = 0; i < events.length; i ++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       final String eventName = event.commandClassName.snakeCase;
-      // classBuffer.writeln("'$eventName': ${visitor.className}.events,");
+      classBuffer.writeln("'$eventName': const ${event.commandClassName}(),");
     }
     classBuffer.writeln('};');
     classBuffer.writeln('}');
@@ -69,12 +69,13 @@ class SyncManagerGenerator extends GeneratorForAnnotation<EventSync> {
 
 
   EventConfig resolveEvent(ConstantReader eventReader) {
-    final command = eventReader.read('command').objectValue;
+
+    final command = eventReader.read('handler').objectValue;
     final commandType = command.type;
     // final command = eventReader.peek('command')?.typeValue;
 
     if (commandType == null) {
-      throw Exception('Unknown command type');
+      throw Exception('Missing event handler type');
     }
 
     final className = commandType.getDisplayString(
@@ -83,7 +84,6 @@ class SyncManagerGenerator extends GeneratorForAnnotation<EventSync> {
     final genericClassType = getCommandParamType(commandType);
     final paramsClassName =
         genericClassType.getDisplayString(withNullability: false);
-
     return EventConfig(
       commandClassName: className,
       paramsClassName: paramsClassName,
