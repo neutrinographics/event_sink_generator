@@ -134,12 +134,10 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
     final paramsClassName =
         genericClassType.getDisplayString(withNullability: false);
     return EventConfig(
-      // commandClassName: className,
-
       eventMachineName: eventName.snakeCase,
       eventPropertyName: eventName.camelCase,
       eventClassName: '${eventName.pascalCase}Event',
-      handlerClassName: '${eventName.pascalCase}EventHandler',
+      handlerClassName: '\$${eventName.pascalCase}EventHandler',
       paramsClassName: paramsClassName, //'${eventName.pascalCase}EventParams',
     );
   }
