@@ -27,19 +27,36 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
     }
     final managerName = visitor.className.replaceFirst('\$', '');
     classBuffer.writeln('class $managerName extends EventSyncBase {');
-    classBuffer.writeln('$managerName() : super();');
+    classBuffer.writeln('$managerName({');
+    for (var i = 0; i < events.length; i++) {
+      final entry = events[i];
+      final eventReader = ConstantReader(entry);
+      EventConfig event = resolveEvent(eventReader);
+      classBuffer.writeln("required this.${event.commandClassName.camelCase},");
+    }
+    classBuffer.writeln('}) : super();');
+
+    // generate params
+    for (var i = 0; i < events.length; i++) {
+      final entry = events[i];
+      final eventReader = ConstantReader(entry);
+      EventConfig event = resolveEvent(eventReader);
+      classBuffer.writeln("final ${event.commandClassName}EventHandler ${event.commandClassName.camelCase};");
+    }
+
     // generate handler map
     classBuffer.writeln('@override');
-    classBuffer.writeln('final Map<String, EventHandler> eventHandlersMap = {');
+    classBuffer.writeln('Map<String, EventHandler> eventHandlersMap() => {');
     // TODO: this is repetitive and inefficient, but it works for now.
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       final String eventName = event.commandClassName.snakeCase;
-      classBuffer.writeln("'$eventName': const ${event.commandClassName}(),");
+      classBuffer.writeln("'$eventName': ${event.commandClassName.camelCase},");
     }
     classBuffer.writeln('};');
+
     // generate params map
     classBuffer.writeln('@override');
     classBuffer.writeln('final Map<String, EventParamsGenerator> eventParamsGeneratorMap = {');
@@ -54,6 +71,14 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
     classBuffer.writeln('};');
 
     classBuffer.writeln('}');
+
+    // generate handlers
+    for (var i = 0; i < events.length; i++) {
+      final entry = events[i];
+      final eventReader = ConstantReader(entry);
+      EventConfig event = resolveEvent(eventReader);
+      classBuffer.writeln("abstract class ${event.commandClassName}EventHandler extends EventHandler<${event.commandClassName}Params> {}");
+    }
 
     // generate event types
     final List<String> eventNames = [];
