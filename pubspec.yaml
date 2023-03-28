@@ -18,7 +18,9 @@ dependencies:
   analyzer: ^4.7.0
   recase: ^4.1.0
   event_sync:
-    path: ../event_sync/
+    git:
+      url: git@github.com:neutrinographics/event_sync.git
+      ref: main
 
 dev_dependencies:
   flutter_test:
