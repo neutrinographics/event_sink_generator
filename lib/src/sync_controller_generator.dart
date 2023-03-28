@@ -32,16 +32,17 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      classBuffer.writeln("required this.${event.commandClassName.camelCase},");
+      classBuffer.writeln("required this.${event.eventPropertyName},");
     }
     classBuffer.writeln('}) : super();');
 
-    // generate params
+    // generate properties
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      classBuffer.writeln("final ${event.commandClassName}EventHandler ${event.commandClassName.camelCase};");
+      classBuffer.writeln(
+          "final ${event.handlerClassName} ${event.eventPropertyName};");
     }
 
     // generate handler map
@@ -52,54 +53,63 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      final String eventName = event.commandClassName.snakeCase;
-      classBuffer.writeln("'$eventName': ${event.commandClassName.camelCase},");
+      classBuffer
+          .writeln("'${event.eventMachineName}': ${event.eventPropertyName},");
     }
     classBuffer.writeln('};');
 
     // generate params map
     classBuffer.writeln('@override');
-    classBuffer.writeln('final Map<String, EventParamsGenerator> eventParamsGeneratorMap = {');
+    classBuffer.writeln(
+        'final Map<String, EventParamsGenerator> eventParamsGeneratorMap = {');
     // TODO: this is repetitive and inefficient, but it works for now.
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      final String eventName = event.commandClassName.snakeCase;
-      classBuffer.writeln("'$eventName': (Map<String, dynamic> json) => ${event.paramsClassName}.fromJson(json),");
+      classBuffer.writeln(
+          "'${event.eventMachineName}': (Map<String, dynamic> json) => ${event.paramsClassName}.fromJson(json),");
     }
     classBuffer.writeln('};');
 
     classBuffer.writeln('}');
 
-    // generate handlers
+    // generate handler classes
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      classBuffer.writeln("abstract class ${event.commandClassName}EventHandler extends EventHandler<${event.commandClassName}Params> {}");
+      classBuffer.writeln(
+          "abstract class ${event.handlerClassName} extends EventHandler<${event.paramsClassName}> {}");
     }
 
-    // generate event types
+    // generate param classes
+    // for (var i = 0; i < events.length; i++) {
+    //   final entry = events[i];
+    //   final eventReader = ConstantReader(entry);
+    //   EventConfig event = resolveEvent(eventReader);
+    //   classBuffer.writeln(
+    //       "abstract class ${event.paramsClassName} implements EventParams {}");
+    // }
+
+    // generate event classes
     final List<String> eventNames = [];
     for (var entry in events) {
       var eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      final String eventName = event.commandClassName.snakeCase;
-      if (eventNames.contains(eventName)) {
+      if (eventNames.contains(event.eventMachineName)) {
         throw Exception(
-            'Duplicate event $eventName. You tried registering the event command ${event.commandClassName} more than once.');
+            'Duplicate event ${event.eventMachineName}. Event names must be unique.');
       }
-      eventNames.add(eventName);
-      final String eventClassName = '${event.commandClassName}Event';
+      eventNames.add(event.eventMachineName);
 
       classBuffer.writeln(
-          'class $eventClassName extends EventInfo<${event.paramsClassName}> {');
+          'class ${event.eventClassName} extends EventInfo<${event.paramsClassName}> {');
       classBuffer.writeln(
-          'const $eventClassName({required String streamId, required ${event.paramsClassName} params})');
+          'const ${event.eventClassName}({required String streamId, required ${event.paramsClassName} params})');
       classBuffer.writeln(': super(');
       classBuffer.writeln('streamId: streamId,');
-      classBuffer.writeln("name: '$eventName',");
+      classBuffer.writeln("name: '${event.eventMachineName}',");
       classBuffer.writeln('data: params,');
       classBuffer.writeln(');');
       classBuffer.writeln('}');
@@ -109,21 +119,28 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
   }
 
   EventConfig resolveEvent(ConstantReader eventReader) {
-    final command = eventReader.read('handler').objectValue;
-    final commandType = command.type;
-    // final command = eventReader.peek('command')?.typeValue;
+    final eventName = eventReader.read('name').stringValue;
+    final eventType = eventReader.objectValue.type;
+    // final command = eventReader.read('handler').objectValue;
+    // final commandType = command.type;
 
-    if (commandType == null) {
-      throw Exception('Missing event handler type');
+    if (eventType == null) {
+      throw Exception(
+          'Missing event data type. You must specify a data type like Event<MyEventData>()');
     }
 
-    final className = commandType.getDisplayString(withNullability: false);
-    final genericClassType = getCommandParamType(commandType);
+    // final className = commandType.getDisplayString(withNullability: false);
+    final genericClassType = getEventDataType(eventType);
     final paramsClassName =
         genericClassType.getDisplayString(withNullability: false);
     return EventConfig(
-      commandClassName: className,
-      paramsClassName: paramsClassName,
+      // commandClassName: className,
+
+      eventMachineName: eventName.snakeCase,
+      eventPropertyName: eventName.camelCase,
+      eventClassName: '${eventName.pascalCase}Event',
+      handlerClassName: '${eventName.pascalCase}EventHandler',
+      paramsClassName: paramsClassName, //'${eventName.pascalCase}EventParams',
     );
   }
 
@@ -136,6 +153,23 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
     return false;
   }
 
+  DartType getEventDataType(DartType type) {
+    final element = type.element2;
+    if (element is ClassElement) {
+      final genericTypes = getGenericTypes(type);
+      if (genericTypes.isEmpty) {
+        throw Exception('Missing event data type');
+      }
+      final dataType = genericTypes.first;
+      if (genericTypes.first is ClassElement) {
+        throw Exception('Event Data type must be a class');
+      }
+      return dataType;
+    } else {
+      throw Exception('Event must be a class');
+    }
+  }
+
   DartType getCommandParamType(DartType type) {
     String commandName = type.getDisplayString(withNullability: false);
     final element = type.element2;
@@ -145,6 +179,9 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
         throw Exception('Event command $commandName must extend Command');
       }
       final genericTypes = getGenericTypes(superTypes.first);
+      if (genericTypes.isEmpty) {
+        throw Exception('No generic types found on $commandName');
+      }
       return genericTypes.first;
     } else {
       throw Exception('Event command $commandName must be a class');

@@ -62,14 +62,19 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
       throw Exception('Unknown command type');
     }
 
-    final className = commandType.getDisplayString(withNullability: false);
+    // final className = commandType.getDisplayString(withNullability: false);
     final genericClassType = getCommandParamType(commandType);
     final paramsClassName =
         genericClassType.getDisplayString(withNullability: false);
 
     return EventConfig(
-      commandClassName: className,
+      // commandClassName: className,
       paramsClassName: paramsClassName,
+      // not implemented
+      eventMachineName: '',
+      eventClassName: '',
+      eventPropertyName: '',
+      handlerClassName: '',
     );
   }
 
