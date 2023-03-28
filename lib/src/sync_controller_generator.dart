@@ -106,11 +106,11 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
       classBuffer.writeln(
           'class ${event.eventClassName} extends EventInfo<${event.paramsClassName}> {');
       classBuffer.writeln(
-          'const ${event.eventClassName}({required String streamId, required ${event.paramsClassName} params})');
+          'const ${event.eventClassName}({required String streamId, required ${event.paramsClassName} data})');
       classBuffer.writeln(': super(');
       classBuffer.writeln('streamId: streamId,');
       classBuffer.writeln("name: '${event.eventMachineName}',");
-      classBuffer.writeln('data: params,');
+      classBuffer.writeln('data: data,');
       classBuffer.writeln(');');
       classBuffer.writeln('}');
     }
