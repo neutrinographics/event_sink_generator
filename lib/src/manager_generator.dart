@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:build/build.dart';
 
 // https://stackoverflow.com/questions/56972823/dart-build-runner-generate-one-dart-file-with-content
-@Deprecated('Use SyncManagerGenerator instead')
+@Deprecated('Use SinkManagerGenerator instead')
 class ManagerGenerator implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
@@ -22,12 +22,12 @@ class ManagerGenerator implements Builder {
     classBuilder.writeln('// hello world!');
 
     await buildStep.writeAsString(
-        AssetId(buildStep.inputId.package, 'lib/event_sync.g.dart'),
+        AssetId(buildStep.inputId.package, 'lib/event_sink.g.dart'),
         classBuilder.toString());
   }
 
   @override
   final buildExtensions = const {
-    r'$lib$': ['event_sync.g.dart']
+    r'$lib$': ['event_sink.g.dart']
   };
 }

@@ -3,7 +3,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 
-import 'package:event_sync/event_sync.dart';
+import 'package:event_sink/event_sink.dart';
 
 @Deprecated('This has not been implemented yet')
 class ParamsGenerator extends GeneratorForAnnotation<EventSerializable> {

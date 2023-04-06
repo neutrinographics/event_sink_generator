@@ -1,26 +1,26 @@
 targets:
   $default:
     builders:
-      event_sync_generator:events:
+      event_sink_generator:events:
         generate_for:
           - lib/*
         enabled: true
-#      event_sync_generator:manager:
+#      event_sink_generator:manager:
 #        generate_for:
 #          - lib/*
 #        enabled: false
 
 builders:
   events:
-    import: "package:event_sync_generator/builder.dart"
-    builder_factories: ["generateSyncManager"]
+    import: "package:event_sink_generator/builder.dart"
+    builder_factories: ["generateSinkManager"]
     build_extensions: {".dart": [".event.g.part"]}
     auto_apply: dependents
     build_to: cache
-#    runs_before: ["event_sync_generator:manager"]
+#    runs_before: ["event_sink_generator:manager"]
     applies_builders: ["source_gen|combining_builder"]
 #  manager:
-#    import: "package:event_sync_generator/builder.dart"
+#    import: "package:event_sink_generator/builder.dart"
 #    builder_factories: ["generateManager"]
 #    build_extensions: {".dart": [".g.part"]}
 #    auto_apply: dependents

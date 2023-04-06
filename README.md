@@ -1,4 +1,4 @@
-This is the code generator for event_sync.
+This is the code generator for event_sink.
 
 ## Features
 
@@ -6,13 +6,13 @@ TODO: List what your package can do. Maybe include images, gifs, or videos.
 
 ## Getting started
 
-You should install this as a development dependency, and event_sync should be installed as a 
+You should install this as a development dependency, and event_sink should be installed as a 
 regular dependency.
 This package relies on build_runner, which should be installed as a development dependency as well.
 
 ## Usage
 
-See the event_sync package for detailed usage examples.
+See the event_sink package for detailed usage examples.
 
 Generate the necessary code by executing:
 ```bash

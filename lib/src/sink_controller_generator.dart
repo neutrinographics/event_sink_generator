@@ -2,15 +2,15 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
-import 'package:event_sync_generator/src/model_visitor.dart';
-import 'package:event_sync_generator/src/models/event_config.dart';
+import 'package:event_sink_generator/src/model_visitor.dart';
+import 'package:event_sink_generator/src/models/event_config.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
 
-import 'package:event_sync/event_sync.dart';
+import 'package:event_sink/event_sink.dart';
 
 /// Generates a new sync controller.
-class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
+class SinkControllerGenerator extends GeneratorForAnnotation<EventSink> {
   @override
   FutureOr<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
@@ -23,10 +23,10 @@ class SyncControllerGenerator extends GeneratorForAnnotation<EventSync> {
     // generate the sync manager
     if (!visitor.className.startsWith('\$')) {
       throw Exception(
-          'The target class of the EventSync annotation must start with a dollar (\$) sign.');
+          'The target class of the EventSink annotation must start with a dollar (\$) sign.');
     }
     final managerName = visitor.className.replaceFirst('\$', '');
-    classBuffer.writeln('class $managerName extends EventSyncBase {');
+    classBuffer.writeln('class $managerName extends EventSinkBase {');
     classBuffer.writeln('$managerName({');
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];

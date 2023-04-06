@@ -1,6 +1,6 @@
-name: event_sync_generator
+name: event_sink_generator
 description: A new Flutter package project.
-version: 0.0.1
+version: 0.0.2
 homepage:
 # TODO: remove this once we deploy this
 publish_to: none
@@ -17,9 +17,9 @@ dependencies:
   build_config: ^1.1.1
   analyzer: ^4.7.0
   recase: ^4.1.0
-  event_sync:
+  event_sink:
     git:
-      url: git@github.com:neutrinographics/event_sync.git
+      url: git@github.com:neutrinographics/event_sink.git
       ref: main
 
 dev_dependencies:

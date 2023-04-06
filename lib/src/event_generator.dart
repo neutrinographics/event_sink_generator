@@ -2,15 +2,15 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
-import 'package:event_sync_generator/src/event_model_visitor.dart';
-import 'package:event_sync_generator/src/models/event_config.dart';
+import 'package:event_sink_generator/src/event_model_visitor.dart';
+import 'package:event_sink_generator/src/models/event_config.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
 
-import 'package:event_sync/event_sync.dart';
+import 'package:event_sink/event_sink.dart';
 
 /// Generates individual event classes
-@Deprecated('Use the SyncManagerGenerator instead')
+@Deprecated('Use the SinkManagerGenerator instead')
 class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
   final List<String> eventNames = [];
 
