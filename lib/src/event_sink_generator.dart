@@ -32,9 +32,16 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      classBuffer.writeln("required this.${event.eventPropertyName},");
+      classBuffer.writeln("required ${event.handlerClassName} ${event.eventPropertyName},");
     }
-    classBuffer.writeln('}) : super();');
+    classBuffer.writeln('}) :');
+    for (var i = 0; i < events.length; i++) {
+      final entry = events[i];
+      final eventReader = ConstantReader(entry);
+      EventConfig event = resolveEvent(eventReader);
+      classBuffer.writeln("this._${event.eventPropertyName} = ${event.eventPropertyName},");
+    }
+    classBuffer.writeln(' super();');
 
     // generate properties
     for (var i = 0; i < events.length; i++) {
@@ -42,26 +49,26 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
-          "final ${event.handlerClassName} ${event.eventPropertyName};");
+          "final ${event.handlerClassName} _${event.eventPropertyName};");
     }
 
     // generate handler map
     classBuffer.writeln('@override');
-    classBuffer.writeln('Map<String, EventHandler> eventHandlersMap() => {');
+    classBuffer.writeln('Map<String, EventHandler> _eventHandlersMap() => {');
     // TODO: this is repetitive and inefficient, but it works for now.
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer
-          .writeln("'${event.eventMachineName}': ${event.eventPropertyName},");
+          .writeln("'${event.eventMachineName}': _${event.eventPropertyName},");
     }
     classBuffer.writeln('};');
 
     // generate params map
     classBuffer.writeln('@override');
     classBuffer.writeln(
-        'final Map<String, EventParamsGenerator> eventParamsGeneratorMap = {');
+        'final Map<String, EventDataGenerator> _eventDataGeneratorMap = {');
     // TODO: this is repetitive and inefficient, but it works for now.
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
