@@ -10,7 +10,7 @@ import 'package:source_gen/source_gen.dart';
 import 'package:event_sink/event_sink.dart';
 
 /// Generates a new sync controller.
-class SinkControllerGenerator extends GeneratorForAnnotation<EventSink> {
+class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
   @override
   FutureOr<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
