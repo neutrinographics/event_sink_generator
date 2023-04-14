@@ -10,8 +10,7 @@ environment:
 
 dependencies:
   build: ^2.1.1
-  source_gen: ^1.2.7
-  analyzer: ^5.9.0
+  source_gen: 1.2.6
   recase: ^4.1.0
   event_sink:
 #    path: ../../neutrinographics/event_sink
@@ -20,6 +19,6 @@ dependencies:
       ref: main
 
 dev_dependencies:
-  flutter_lints: ^2.0.1
-  build_runner: ^2.3.3
+  flutter_lints: ^2.0.0
+  build_runner: 2.2.1
   build_test: ^2.1.5
