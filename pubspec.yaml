@@ -1,6 +1,6 @@
 name: event_sink_generator
 description: A new Flutter package project.
-version: 0.0.4
+version: 0.0.5
 homepage:
 # TODO: remove this once we deploy this
 publish_to: none
@@ -12,6 +12,7 @@ dependencies:
   build: ^2.1.1
   source_gen: ^1.2.6
   recase: ^4.1.0
+  analyzer: ^4.7.0
   event_sink:
 #    path: ../../neutrinographics/event_sink
     git:

@@ -32,14 +32,16 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      classBuffer.writeln("required ${event.handlerClassName} ${event.eventPropertyName},");
+      classBuffer.writeln(
+          "required ${event.handlerClassName} ${event.eventPropertyName},");
     }
     classBuffer.writeln('}) :');
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      classBuffer.writeln("this._${event.eventPropertyName} = ${event.eventPropertyName},");
+      classBuffer.writeln(
+          "this._${event.eventPropertyName} = ${event.eventPropertyName},");
     }
     classBuffer.writeln(' super();');
 
@@ -119,6 +121,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
       classBuffer.writeln("name: '${event.eventMachineName}',");
       classBuffer.writeln('data: data,');
       classBuffer.writeln(');');
+      classBuffer.writeln('@override');
+      classBuffer.writeln('List<Object?> get props => [streamId, name, data];');
       classBuffer.writeln('}');
     }
 
