@@ -56,7 +56,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
 
     // generate handler map
     classBuffer.writeln('@override');
-    classBuffer.writeln('Map<String, EventHandler> _eventHandlersMap() => {');
+    classBuffer.writeln('Map<String, EventHandler> eventHandlersMap() => {');
     // TODO: this is repetitive and inefficient, but it works for now.
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
@@ -70,7 +70,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
     // generate params map
     classBuffer.writeln('@override');
     classBuffer.writeln(
-        'final Map<String, EventDataGenerator> _eventDataGeneratorMap = {');
+        'final Map<String, EventDataGenerator> eventDataGeneratorMap = {');
     // TODO: this is repetitive and inefficient, but it works for now.
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
