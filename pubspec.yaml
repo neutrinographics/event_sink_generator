@@ -1,6 +1,6 @@
 name: event_sink_generator
 description: A new Flutter package project.
-version: 0.0.6
+version: 0.0.7
 homepage:
 # TODO: remove this once we deploy this
 publish_to: none
