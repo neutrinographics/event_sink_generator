@@ -1,6 +1,6 @@
 name: event_sink_generator
-description: A new Flutter package project.
-version: 0.0.8
+description: Used to generate an implementation of an EventSink.
+version: 1.0.0
 homepage:
 # TODO: remove this once we deploy this
 publish_to: none
@@ -20,6 +20,6 @@ dependencies:
       ref: main
 
 dev_dependencies:
-  flutter_lints: ^2.0.0
-  build_runner: ^2.2.1
+  flutter_lints: ^3.0.2
+  build_runner: ^2.4.9
   build_test: ^2.1.5

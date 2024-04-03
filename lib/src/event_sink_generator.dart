@@ -10,7 +10,7 @@ import 'package:source_gen/source_gen.dart';
 import 'package:event_sink/event_sink.dart';
 
 /// Generates a new sync controller.
-class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
+class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
   @override
   FutureOr<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
@@ -23,10 +23,10 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
     // generate the sync manager
     if (!visitor.className.startsWith('\$')) {
       throw Exception(
-          'The target class of the EventSink annotation must start with a dollar (\$) sign.');
+          'The target class of the EventSinkConfig annotation must start with a dollar (\$) sign.');
     }
     final managerName = visitor.className.replaceFirst('\$', '');
-    classBuffer.writeln('class $managerName extends EventSinkBase {');
+    classBuffer.writeln('class $managerName extends EventSink {');
     classBuffer.writeln('$managerName({');
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
@@ -154,7 +154,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
   }
 
   bool canHaveGenerics(DartType type) {
-    final element = type.element2;
+    final element = type.element;
     if (element is ClassElement) {
       element.allSupertypes;
       return element.typeParameters.isNotEmpty;
@@ -163,7 +163,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
   }
 
   DartType getEventDataType(DartType type) {
-    final element = type.element2;
+    final element = type.element;
     if (element is ClassElement) {
       final genericTypes = getGenericTypes(type);
       if (genericTypes.isEmpty) {
@@ -181,7 +181,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSink> {
 
   DartType getCommandParamType(DartType type) {
     String commandName = type.getDisplayString(withNullability: false);
-    final element = type.element2;
+    final element = type.element;
     if (element is ClassElement) {
       final superTypes = element.allSupertypes;
       if (superTypes.isEmpty) {

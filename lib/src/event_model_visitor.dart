@@ -22,7 +22,7 @@ class EventModelVisitor extends SimpleElementVisitor<void> {
   }
 
   Iterable<DartType> getInheritedGenericTypes(DartType type) {
-    final element = type.element2;
+    final element = type.element;
     if (element is ClassElement) {
       final superTypes = element.allSupertypes;
 
