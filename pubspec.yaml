@@ -14,7 +14,7 @@ dependencies:
   recase: ^4.1.0
   analyzer: ^5.0.0
   event_sink:
-#    path: ../../neutrinographics/event_sink
+    #    path: ../../neutrinographics/event_sink
     git:
       url: git@github.com:neutrinographics/event_sink.git
       ref: main
