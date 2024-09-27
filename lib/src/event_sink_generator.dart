@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:event_sink_generator/src/model_visitor.dart';
+import 'package:event_sink_generator/src/models/data_source_config.dart';
 import 'package:event_sink_generator/src/models/event_config.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
@@ -16,6 +17,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       Element element, ConstantReader annotation, BuildStep buildStep) {
     final visitor = ModelVisitor();
     element.visitChildren(visitor);
+    final dataSources = annotation.read('dataSources').listValue;
     final events = annotation.read('events').listValue;
 
     final classBuffer = StringBuffer();
@@ -28,6 +30,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     final managerName = visitor.className.replaceFirst('\$', '');
     classBuffer.writeln('class $managerName extends EventSink {');
     classBuffer.writeln('$managerName({');
+    classBuffer.writeln("required \$DataSources dataSources,");
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
@@ -36,6 +39,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
           "required ${event.handlerClassName} ${event.eventPropertyName},");
     }
     classBuffer.writeln('}) :');
+    classBuffer.writeln('this._dataSources = dataSources,');
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
@@ -46,6 +50,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     classBuffer.writeln(' super();');
 
     // generate properties
+    classBuffer.writeln('final \$DataSources dataSources;');
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
@@ -81,6 +86,24 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     }
     classBuffer.writeln('};');
 
+    classBuffer.writeln('}');
+
+    // generate data sources class
+    classBuffer.writeln('class \$DataSources {');
+    classBuffer.writeln('const \$DataSources({');
+    for (var i = 0; i < dataSources.length; i++) {
+      final entry = dataSources[i];
+      final dataSourceReader = ConstantReader(entry);
+      DataSourceConfig dataSource = resolveDataSource(dataSourceReader);
+      classBuffer.writeln('required this.${dataSource.dataSourcePropertyName},');
+    }
+    classBuffer.writeln('});');
+    for (var i = 0; i < dataSources.length; i++) {
+      final entry = dataSources[i];
+      final dataSourceReader = ConstantReader(entry);
+      DataSourceConfig dataSource = resolveDataSource(dataSourceReader);
+      classBuffer.writeln('final ${dataSource.dataSourceClassName} ${dataSource.dataSourcePropertyName};');
+    }
     classBuffer.writeln('}');
 
     // generate handler classes
@@ -127,6 +150,24 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     }
 
     return classBuffer.toString();
+  }
+
+  DataSourceConfig resolveDataSource(ConstantReader dataSourceReader) {
+    final dataSourceName = dataSourceReader.read('name').stringValue;
+    final dataSourceType = dataSourceReader.objectValue.type;
+
+    if (dataSourceType == null) {
+      throw Exception(
+          'Missing data source data type. You must specify a data type like DataSource<EventDataSource>()');
+    }
+
+    final genericClassType = getEventDataType(dataSourceType);
+    final dataSourceClassName =
+        genericClassType.getDisplayString(withNullability: false);
+    return DataSourceConfig(
+      dataSourceClassName:  dataSourceClassName.pascalCase,
+      dataSourcePropertyName: dataSourceName.camelCase,
+    );
   }
 
   EventConfig resolveEvent(ConstantReader eventReader) {
