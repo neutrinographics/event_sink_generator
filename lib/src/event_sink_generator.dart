@@ -30,7 +30,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     final managerName = visitor.className.replaceFirst('\$', '');
     classBuffer.writeln('class $managerName extends EventSink {');
     classBuffer.writeln('$managerName({');
-    classBuffer.writeln("required \$DataSources dataSources,");
+    classBuffer.writeln("required this.dataSources,");
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
@@ -39,7 +39,6 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
           "required ${event.handlerClassName} ${event.eventPropertyName},");
     }
     classBuffer.writeln('}) :');
-    classBuffer.writeln('this._dataSources = dataSources,');
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
@@ -95,14 +94,16 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       final entry = dataSources[i];
       final dataSourceReader = ConstantReader(entry);
       DataSourceConfig dataSource = resolveDataSource(dataSourceReader);
-      classBuffer.writeln('required this.${dataSource.dataSourcePropertyName},');
+      classBuffer
+          .writeln('required this.${dataSource.dataSourcePropertyName},');
     }
     classBuffer.writeln('});');
     for (var i = 0; i < dataSources.length; i++) {
       final entry = dataSources[i];
       final dataSourceReader = ConstantReader(entry);
       DataSourceConfig dataSource = resolveDataSource(dataSourceReader);
-      classBuffer.writeln('final ${dataSource.dataSourceClassName} ${dataSource.dataSourcePropertyName};');
+      classBuffer.writeln(
+          'final ${dataSource.dataSourceClassName} ${dataSource.dataSourcePropertyName};');
     }
     classBuffer.writeln('}');
 
@@ -165,7 +166,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     final dataSourceClassName =
         genericClassType.getDisplayString(withNullability: false);
     return DataSourceConfig(
-      dataSourceClassName:  dataSourceClassName.pascalCase,
+      dataSourceClassName: dataSourceClassName.pascalCase,
       dataSourcePropertyName: dataSourceName.camelCase,
     );
   }
