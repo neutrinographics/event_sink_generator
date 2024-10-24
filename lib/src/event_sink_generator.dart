@@ -4,6 +4,7 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:event_sink_generator/src/model_visitor.dart';
 import 'package:event_sink_generator/src/models/event_config.dart';
+import 'package:event_sink_generator/src/models/remote_adapter_config.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -17,6 +18,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     final visitor = ModelVisitor();
     element.visitChildren(visitor);
     final events = annotation.read('events').listValue;
+    final remotes = annotation.read('remotes').listValue;
 
     final classBuffer = StringBuffer();
 
@@ -35,13 +37,19 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       classBuffer.writeln(
           "required ${event.handlerClassName} ${event.eventPropertyName},");
     }
+    for (var i = 0; i < remotes.length; i++) {
+      final entry = remotes[i];
+      final remoteReader = ConstantReader(entry);
+      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+      classBuffer.writeln("required this.${remote.remoteAdapterPropertyName},");
+    }
     classBuffer.writeln('}) :');
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      classBuffer.writeln(
-          "this._${event.eventPropertyName} = ${event.eventPropertyName},");
+      classBuffer
+          .writeln("_${event.eventPropertyName} = ${event.eventPropertyName},");
     }
     classBuffer.writeln(' super();');
 
@@ -52,6 +60,13 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
           "final ${event.handlerClassName} _${event.eventPropertyName};");
+    }
+    for (var i = 0; i < remotes.length; i++) {
+      final entry = remotes[i];
+      final remoteReader = ConstantReader(entry);
+      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+      classBuffer.writeln(
+          'final ${remote.remoteAdapterClassName} ${remote.remoteAdapterPropertyName};');
     }
 
     // generate handler map
@@ -126,6 +141,21 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       classBuffer.writeln('}');
     }
 
+    // generate remote adapters classes
+    for (var i = 0; i < remotes.length; i++) {
+      final entry = remotes[i];
+      final remoteReader = ConstantReader(entry);
+      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+      classBuffer.writeln(
+          'abstract class ${remote.remoteAdapterClassName} extends EventRemoteAdapter with RemoteAdapterProperties {');
+      classBuffer.writeln('@override');
+      classBuffer
+          .writeln('PullStrategy get pullStrategy => ${remote.pullStrategy};');
+      classBuffer.writeln('@override');
+      classBuffer.writeln('int get priority => ${remote.priority};');
+      classBuffer.writeln('}');
+    }
+
     return classBuffer.toString();
   }
 
@@ -150,6 +180,27 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       eventClassName: '${eventName.pascalCase}Event',
       handlerClassName: '\$${eventName.pascalCase}EventHandler',
       paramsClassName: paramsClassName, //'${eventName.pascalCase}EventParams',
+    );
+  }
+
+  RemoteAdapterConfig resolveRemoteAdapter(ConstantReader remoteReader) {
+    final remoteName = remoteReader.read('name').stringValue;
+    final priority = remoteReader.read('priority').intValue;
+    final pullStrategy = remoteReader
+        .read('pullStrategy')
+        .objectValue
+        .getField('_name')
+        ?.toStringValue();
+
+    if (pullStrategy == null) {
+      throw Exception('Cannot resolve pull strategy');
+    }
+
+    return RemoteAdapterConfig(
+      remoteAdapterClassName: '\$${remoteName.pascalCase}RemoteAdapter',
+      remoteAdapterPropertyName: '${remoteName.camelCase}RemoteAdapter',
+      priority: priority,
+      pullStrategy: 'PullStrategy.$pullStrategy',
     );
   }
 
