@@ -30,30 +30,26 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     final managerName = visitor.className.replaceFirst('\$', '');
     classBuffer.writeln('class $managerName extends EventSink {');
     classBuffer.writeln('$managerName({');
-    for (var i = 0; i < events.length; i++) {
-      final entry = events[i];
+    for (final entry in events) {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
           "required ${event.handlerClassName} ${event.eventPropertyName},");
     }
-    for (var i = 0; i < remotes.length; i++) {
-      final entry = remotes[i];
+    for (final entry in remotes) {
       final remoteReader = ConstantReader(entry);
       RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
           "required ${remote.remoteAdapterClassName} ${remote.remoteAdapterPropertyName},");
     }
     classBuffer.writeln('}) :');
-    for (var i = 0; i < events.length; i++) {
-      final entry = events[i];
+    for (final entry in events) {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer
           .writeln("_${event.eventPropertyName} = ${event.eventPropertyName},");
     }
-    for (var i = 0; i < remotes.length; i++) {
-      final entry = remotes[i];
+    for (final entry in remotes) {
       final remoteReader = ConstantReader(entry);
       RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
@@ -62,15 +58,13 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     classBuffer.writeln(' super();');
 
     // generate properties
-    for (var i = 0; i < events.length; i++) {
-      final entry = events[i];
+    for (final entry in events) {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
           "final ${event.handlerClassName} _${event.eventPropertyName};");
     }
-    for (var i = 0; i < remotes.length; i++) {
-      final entry = remotes[i];
+    for (final entry in remotes) {
       final remoteReader = ConstantReader(entry);
       RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
@@ -81,8 +75,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     classBuffer.writeln('@override');
     classBuffer.writeln('Map<String, EventHandler> eventHandlersMap() => {');
     // TODO: this is repetitive and inefficient, but it works for now.
-    for (var i = 0; i < events.length; i++) {
-      final entry = events[i];
+    for (final entry in events) {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer
@@ -95,8 +88,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     classBuffer.writeln(
         'final Map<String, EventDataGenerator> eventDataGeneratorMap = {');
     // TODO: this is repetitive and inefficient, but it works for now.
-    for (var i = 0; i < events.length; i++) {
-      final entry = events[i];
+    for (final entry in events) {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
@@ -108,8 +100,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     classBuffer.writeln('@override');
     classBuffer.writeln(
         'Map<String, EventRemoteAdapter> get eventRemoteAdapters => {');
-    for (var i = 0; i < remotes.length; i++) {
-      final entry = remotes[i];
+    for (final entry in remotes) {
       final remoteReader = ConstantReader(entry);
       RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
@@ -120,8 +111,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     classBuffer.writeln('}');
 
     // generate handler classes
-    for (var i = 0; i < events.length; i++) {
-      final entry = events[i];
+    for (final entry in events) {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
@@ -163,8 +153,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     }
 
     // generate remote adapters classes
-    for (var i = 0; i < remotes.length; i++) {
-      final entry = remotes[i];
+    for (final entry in remotes) {
       final remoteReader = ConstantReader(entry);
       RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
