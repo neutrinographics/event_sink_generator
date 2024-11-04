@@ -41,7 +41,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       final entry = remotes[i];
       final remoteReader = ConstantReader(entry);
       RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
-      classBuffer.writeln("required this.${remote.remoteAdapterPropertyName},");
+      classBuffer.writeln(
+          "required ${remote.remoteAdapterClassName} ${remote.remoteAdapterPropertyName},");
     }
     classBuffer.writeln('}) :');
     for (var i = 0; i < events.length; i++) {
@@ -50,6 +51,13 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       EventConfig event = resolveEvent(eventReader);
       classBuffer
           .writeln("_${event.eventPropertyName} = ${event.eventPropertyName},");
+    }
+    for (var i = 0; i < remotes.length; i++) {
+      final entry = remotes[i];
+      final remoteReader = ConstantReader(entry);
+      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+      classBuffer.writeln(
+          "_${remote.remoteAdapterPropertyName} = ${remote.remoteAdapterPropertyName},");
     }
     classBuffer.writeln(' super();');
 
@@ -66,7 +74,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       final remoteReader = ConstantReader(entry);
       RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
-          'final ${remote.remoteAdapterClassName} ${remote.remoteAdapterPropertyName};');
+          'final ${remote.remoteAdapterClassName} _${remote.remoteAdapterPropertyName};');
     }
 
     // generate handler map
@@ -93,6 +101,19 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
           "'${event.eventMachineName}': (Map<String, dynamic> json) => ${event.paramsClassName}.fromJson(json),");
+    }
+    classBuffer.writeln('};');
+
+    // generate remote adapters map
+    classBuffer.writeln('@override');
+    classBuffer.writeln(
+        'Map<String, EventRemoteAdapter> get eventRemoteAdapters => {');
+    for (var i = 0; i < remotes.length; i++) {
+      final entry = remotes[i];
+      final remoteReader = ConstantReader(entry);
+      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+      classBuffer.writeln(
+          "'${remote.remoteAdapterKey}': _${remote.remoteAdapterPropertyName},");
     }
     classBuffer.writeln('};');
 
@@ -147,7 +168,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       final remoteReader = ConstantReader(entry);
       RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
-          'abstract class ${remote.remoteAdapterClassName} extends EventRemoteAdapter with RemoteAdapterProperties {');
+          'abstract class ${remote.remoteAdapterClassName} extends EventRemoteAdapter {');
       classBuffer.writeln('@override');
       classBuffer
           .writeln('PullStrategy get pullStrategy => ${remote.pullStrategy};');
@@ -197,6 +218,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     }
 
     return RemoteAdapterConfig(
+      remoteAdapterKey: remoteName,
       remoteAdapterClassName: '\$${remoteName.pascalCase}RemoteAdapter',
       remoteAdapterPropertyName: '${remoteName.camelCase}RemoteAdapter',
       priority: priority,
