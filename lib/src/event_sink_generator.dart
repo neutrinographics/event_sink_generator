@@ -17,8 +17,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       Element element, ConstantReader annotation, BuildStep buildStep) {
     final visitor = ModelVisitor();
     element.visitChildren(visitor);
-    final events = annotation.read('events').listValue;
-    final remotes = annotation.read('remotes').listValue;
+    final eventAnnotations = annotation.read('events').listValue;
+    final remoteAnnotations = annotation.read('remotes').listValue;
 
     final classBuffer = StringBuffer();
 
@@ -30,53 +30,53 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     final managerName = visitor.className.replaceFirst('\$', '');
     classBuffer.writeln('class $managerName extends EventSink {');
     classBuffer.writeln('$managerName({');
-    for (final entry in events) {
-      final eventReader = ConstantReader(entry);
+    for (final eventAnnotation in eventAnnotations) {
+      final eventReader = ConstantReader(eventAnnotation);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
           "required ${event.handlerClassName} ${event.eventPropertyName},");
     }
-    for (final entry in remotes) {
-      final remoteReader = ConstantReader(entry);
-      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+    for (final remoteAnnotation in remoteAnnotations) {
+      final remoteReader = ConstantReader(remoteAnnotation);
+      RemoteAdapterConfig remoteAdapter = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
-          "required ${remote.remoteAdapterClassName} ${remote.remoteAdapterPropertyName},");
+          "required ${remoteAdapter.remoteAdapterClassName} ${remoteAdapter.remoteAdapterPropertyName},");
     }
     classBuffer.writeln('}) :');
-    for (final entry in events) {
-      final eventReader = ConstantReader(entry);
+    for (final eventAnnotation in eventAnnotations) {
+      final eventReader = ConstantReader(eventAnnotation);
       EventConfig event = resolveEvent(eventReader);
       classBuffer
           .writeln("_${event.eventPropertyName} = ${event.eventPropertyName},");
     }
-    for (final entry in remotes) {
-      final remoteReader = ConstantReader(entry);
-      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+    for (final remoteAnnotation in remoteAnnotations) {
+      final remoteReader = ConstantReader(remoteAnnotation);
+      RemoteAdapterConfig remoteAdapter = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
-          "_${remote.remoteAdapterPropertyName} = ${remote.remoteAdapterPropertyName},");
+          "_${remoteAdapter.remoteAdapterPropertyName} = ${remoteAdapter.remoteAdapterPropertyName},");
     }
     classBuffer.writeln(' super();');
 
     // generate properties
-    for (final entry in events) {
-      final eventReader = ConstantReader(entry);
+    for (final eventAnnotation in eventAnnotations) {
+      final eventReader = ConstantReader(eventAnnotation);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
           "final ${event.handlerClassName} _${event.eventPropertyName};");
     }
-    for (final entry in remotes) {
-      final remoteReader = ConstantReader(entry);
-      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+    for (final remoteAnnotation in remoteAnnotations) {
+      final remoteReader = ConstantReader(remoteAnnotation);
+      RemoteAdapterConfig remoteAdapter = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
-          'final ${remote.remoteAdapterClassName} _${remote.remoteAdapterPropertyName};');
+          'final ${remoteAdapter.remoteAdapterClassName} _${remoteAdapter.remoteAdapterPropertyName};');
     }
 
     // generate handler map
     classBuffer.writeln('@override');
     classBuffer.writeln('Map<String, EventHandler> eventHandlersMap() => {');
     // TODO: this is repetitive and inefficient, but it works for now.
-    for (final entry in events) {
-      final eventReader = ConstantReader(entry);
+    for (final eventAnnotation in eventAnnotations) {
+      final eventReader = ConstantReader(eventAnnotation);
       EventConfig event = resolveEvent(eventReader);
       classBuffer
           .writeln("'${event.eventMachineName}': _${event.eventPropertyName},");
@@ -88,8 +88,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     classBuffer.writeln(
         'final Map<String, EventDataGenerator> eventDataGeneratorMap = {');
     // TODO: this is repetitive and inefficient, but it works for now.
-    for (final entry in events) {
-      final eventReader = ConstantReader(entry);
+    for (final eventAnnotation in eventAnnotations) {
+      final eventReader = ConstantReader(eventAnnotation);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
           "'${event.eventMachineName}': (Map<String, dynamic> json) => ${event.paramsClassName}.fromJson(json),");
@@ -100,19 +100,19 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     classBuffer.writeln('@override');
     classBuffer.writeln(
         'Map<String, EventRemoteAdapter> get eventRemoteAdapters => {');
-    for (final entry in remotes) {
-      final remoteReader = ConstantReader(entry);
-      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+    for (final remoteAnnotation in remoteAnnotations) {
+      final remoteReader = ConstantReader(remoteAnnotation);
+      RemoteAdapterConfig remoteAdapter = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
-          "'${remote.remoteAdapterKey}': _${remote.remoteAdapterPropertyName},");
+          "'${remoteAdapter.remoteAdapterKey}': _${remoteAdapter.remoteAdapterPropertyName},");
     }
     classBuffer.writeln('};');
 
     classBuffer.writeln('}');
 
     // generate handler classes
-    for (final entry in events) {
-      final eventReader = ConstantReader(entry);
+    for (final eventAnnotation in eventAnnotations) {
+      final eventReader = ConstantReader(eventAnnotation);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
           "abstract class ${event.handlerClassName} extends EventHandler<${event.paramsClassName}> {}");
@@ -121,7 +121,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     // generate param classes
     // for (var i = 0; i < events.length; i++) {
     //   final entry = events[i];
-    //   final eventReader = ConstantReader(entry);
+    //   final eventReader = ConstantReader(eventAnnotation);
     //   EventConfig event = resolveEvent(eventReader);
     //   classBuffer.writeln(
     //       "abstract class ${event.paramsClassName} implements EventParams {}");
@@ -129,8 +129,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
 
     // generate event classes
     final List<String> eventNames = [];
-    for (var entry in events) {
-      var eventReader = ConstantReader(entry);
+    for (var eventAnnotation in eventAnnotations) {
+      var eventReader = ConstantReader(eventAnnotation);
       EventConfig event = resolveEvent(eventReader);
       if (eventNames.contains(event.eventMachineName)) {
         throw Exception(
@@ -153,16 +153,16 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     }
 
     // generate remote adapters classes
-    for (final entry in remotes) {
-      final remoteReader = ConstantReader(entry);
-      RemoteAdapterConfig remote = resolveRemoteAdapter(remoteReader);
+    for (final remoteAnnotation in remoteAnnotations) {
+      final remoteReader = ConstantReader(remoteAnnotation);
+      RemoteAdapterConfig remoteAdapter = resolveRemoteAdapter(remoteReader);
       classBuffer.writeln(
-          'abstract class ${remote.remoteAdapterClassName} extends EventRemoteAdapter {');
+          'abstract class ${remoteAdapter.remoteAdapterClassName} extends EventRemoteAdapter {');
       classBuffer.writeln('@override');
-      classBuffer
-          .writeln('PullStrategy get pullStrategy => ${remote.pullStrategy};');
+      classBuffer.writeln(
+          'PullStrategy get pullStrategy => ${remoteAdapter.pullStrategy};');
       classBuffer.writeln('@override');
-      classBuffer.writeln('int get priority => ${remote.priority};');
+      classBuffer.writeln('int get priority => ${remoteAdapter.priority};');
       classBuffer.writeln('}');
     }
 
