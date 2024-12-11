@@ -16,7 +16,7 @@ dependencies:
   event_sink:
     #    path: ../../neutrinographics/event_sink
     git:
-      url: git@github.com:neutrinographics/event_sink.git
+      url: https://github.com/neutrinographics/event_sink.git
       ref: main
 
 dev_dependencies:
