@@ -1,6 +1,6 @@
 name: event_sink_generator
 description: Used to generate an implementation of an EventSink.
-version: 1.0.0
+version: 1.4.0
 homepage: https://github.com/neutrinographics/event_sink_generator
 # TODO: remove this once we deploy this
 publish_to: none
