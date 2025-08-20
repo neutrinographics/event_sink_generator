@@ -11,12 +11,12 @@ dependencies:
   build: ^2.1.1
   source_gen: ^1.2.6
   recase: ^4.1.0
-  analyzer: ^6.7.0
   event_sink:
     #    path: ../../neutrinographics/event_sink
     git:
       url: https://github.com/neutrinographics/event_sink.git
       ref: v2.1.2
+  analyzer: ^6.4.1
 
 dev_dependencies:
   flutter_lints: ^4.0.0
