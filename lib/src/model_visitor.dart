@@ -1,7 +1,7 @@
-import 'package:analyzer/dart/element/visitor.dart';
+import 'package:analyzer/dart/element/visitor2.dart';
 import 'package:analyzer/dart/element/element.dart';
 
-class ModelVisitor extends SimpleElementVisitor<void> {
+class ModelVisitor extends SimpleElementVisitor2<void> {
   late String className;
 
   @override

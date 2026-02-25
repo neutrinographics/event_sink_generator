@@ -22,12 +22,13 @@ class ManagerGenerator implements Builder {
     classBuilder.writeln('// hello world!');
 
     await buildStep.writeAsString(
-        AssetId(buildStep.inputId.package, 'lib/event_sink.g.dart'),
-        classBuilder.toString());
+      AssetId(buildStep.inputId.package, 'lib/event_sink.g.dart'),
+      classBuilder.toString(),
+    );
   }
 
   @override
   final buildExtensions = const {
-    r'$lib$': ['event_sink.g.dart']
+    r'$lib$': ['event_sink.g.dart'],
   };
 }

@@ -1,12 +1,10 @@
 import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/dart/element/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 
-class EventModelVisitor extends SimpleElementVisitor<void> {
+class EventModelVisitor {
   late String className;
   late String paramsClassName;
 
-  @override
   void visitConstructorElement(ConstructorElement element) {
     // get the event type
     final elementReturnType = element.type.returnType.toString();
@@ -17,8 +15,7 @@ class EventModelVisitor extends SimpleElementVisitor<void> {
     if (genericTypes.isEmpty) {
       throw Exception('Missing params generic type');
     }
-    paramsClassName =
-        genericTypes.first.getDisplayString(withNullability: false);
+    paramsClassName = genericTypes.first.getDisplayString();
   }
 
   Iterable<DartType> getInheritedGenericTypes(DartType type) {

@@ -13,7 +13,10 @@ import 'package:event_sink/event_sink.dart';
 class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
   @override
   FutureOr<String> generateForAnnotatedElement(
-      Element element, ConstantReader annotation, BuildStep buildStep) {
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) {
     final visitor = ModelVisitor();
     element.visitChildren(visitor);
     final events = annotation.read('events').listValue;
@@ -23,7 +26,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
     // generate the sync manager
     if (!visitor.className.startsWith('\$')) {
       throw Exception(
-          'The target class of the EventSinkConfig annotation must start with a dollar (\$) sign.');
+        'The target class of the EventSinkConfig annotation must start with a dollar (\$) sign.',
+      );
     }
     final managerName = visitor.className.replaceFirst('\$', '');
     classBuffer.writeln('class $managerName extends EventSink {');
@@ -33,7 +37,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
-          "required ${event.handlerClassName} ${event.eventPropertyName},");
+        "required ${event.handlerClassName} ${event.eventPropertyName},",
+      );
     }
     classBuffer.writeln('}) :');
     for (var i = 0; i < events.length; i++) {
@@ -41,7 +46,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
-          "this._${event.eventPropertyName} = ${event.eventPropertyName},");
+        "this._${event.eventPropertyName} = ${event.eventPropertyName},",
+      );
     }
     classBuffer.writeln(' super();');
 
@@ -51,7 +57,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
-          "final ${event.handlerClassName} _${event.eventPropertyName};");
+        "final ${event.handlerClassName} _${event.eventPropertyName};",
+      );
     }
 
     // generate handler map
@@ -62,22 +69,25 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
-      classBuffer
-          .writeln("'${event.eventMachineName}': _${event.eventPropertyName},");
+      classBuffer.writeln(
+        "'${event.eventMachineName}': _${event.eventPropertyName},",
+      );
     }
     classBuffer.writeln('};');
 
     // generate params map
     classBuffer.writeln('@override');
     classBuffer.writeln(
-        'final Map<String, EventDataGenerator> eventDataGeneratorMap = {');
+      'final Map<String, EventDataGenerator> eventDataGeneratorMap = {',
+    );
     // TODO: this is repetitive and inefficient, but it works for now.
     for (var i = 0; i < events.length; i++) {
       final entry = events[i];
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
-          "'${event.eventMachineName}': (Map<String, dynamic> json) => ${event.paramsClassName}.fromJson(json),");
+        "'${event.eventMachineName}': (Map<String, dynamic> json) => ${event.paramsClassName}.fromJson(json),",
+      );
     }
     classBuffer.writeln('};');
 
@@ -89,7 +99,8 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       final eventReader = ConstantReader(entry);
       EventConfig event = resolveEvent(eventReader);
       classBuffer.writeln(
-          "abstract class ${event.handlerClassName} extends EventHandler<${event.paramsClassName}> {}");
+        "abstract class ${event.handlerClassName} extends EventHandler<${event.paramsClassName}> {}",
+      );
     }
 
     // generate param classes
@@ -108,14 +119,17 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
       EventConfig event = resolveEvent(eventReader);
       if (eventNames.contains(event.eventMachineName)) {
         throw Exception(
-            'Duplicate event ${event.eventMachineName}. Event names must be unique.');
+          'Duplicate event ${event.eventMachineName}. Event names must be unique.',
+        );
       }
       eventNames.add(event.eventMachineName);
 
       classBuffer.writeln(
-          'class ${event.eventClassName} extends EventInfo<${event.paramsClassName}> {');
+        'class ${event.eventClassName} extends EventInfo<${event.paramsClassName}> {',
+      );
       classBuffer.writeln(
-          'const ${event.eventClassName}({required String streamId, required ${event.paramsClassName} data})');
+        'const ${event.eventClassName}({required String streamId, required ${event.paramsClassName} data})',
+      );
       classBuffer.writeln(': super(');
       classBuffer.writeln('streamId: streamId,');
       classBuffer.writeln("name: '${event.eventMachineName}',");
@@ -137,13 +151,13 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
 
     if (eventType == null) {
       throw Exception(
-          'Missing event data type. You must specify a data type like Event<MyEventData>()');
+        'Missing event data type. You must specify a data type like Event<MyEventData>()',
+      );
     }
 
     // final className = commandType.getDisplayString(withNullability: false);
     final genericClassType = getEventDataType(eventType);
-    final paramsClassName =
-        genericClassType.getDisplayString(withNullability: false);
+    final paramsClassName = genericClassType.getDisplayString();
     return EventConfig(
       eventMachineName: eventName.snakeCase,
       eventPropertyName: eventName.camelCase,
@@ -180,7 +194,7 @@ class EventSinkGenerator extends GeneratorForAnnotation<EventSinkConfig> {
   }
 
   DartType getCommandParamType(DartType type) {
-    String commandName = type.getDisplayString(withNullability: false);
+    String commandName = type.getDisplayString();
     final element = type.element;
     if (element is ClassElement) {
       final superTypes = element.allSupertypes;
