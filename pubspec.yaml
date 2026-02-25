@@ -1,25 +1,25 @@
 name: event_sink_generator
 description: Used to generate an implementation of an EventSink.
-version: 1.6.0
+version: 1.7.0
 homepage: https://github.com/neutrinographics/event_sink_generator
 # TODO: remove this once we deploy this
 publish_to: none
 
 environment:
-  sdk: '>=3.3.1 <4.0.0'
+  sdk: '>=3.8.0 <4.0.0'
 
 dependencies:
-  build: ^2.1.1
-  source_gen: ^1.2.6
+  build: ^4.0.0
+  source_gen: ^4.0.0
   recase: ^4.1.0
-  analyzer: ^6.4.1
+  analyzer: ^9.0.0
   event_sink:
     # path: ../../neutrinographics/event_sink
     git:
       url: https://github.com/neutrinographics/event_sink.git
-      ref: v1.6.0
+      ref: v1.7.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.4.9
-  build_test: ^2.1.5
+  build_test: ^3.3.3

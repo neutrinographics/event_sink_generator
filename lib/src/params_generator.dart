@@ -9,7 +9,10 @@ import 'package:event_sink/event_sink.dart';
 class ParamsGenerator extends GeneratorForAnnotation<EventSerializable> {
   @override
   FutureOr<String> generateForAnnotatedElement(
-      Element element, ConstantReader annotation, BuildStep buildStep) {
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) {
     final classBuffer = StringBuffer();
     // TODO: generate a serializable event params class.
     return classBuffer.toString();

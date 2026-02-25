@@ -16,10 +16,23 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
 
   @override
   FutureOr<String> generateForAnnotatedElement(
-      Element element, ConstantReader annotation, BuildStep buildStep) {
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) {
     final classBuffer = StringBuffer();
     final visitor = EventModelVisitor();
-    element.visitChildren(visitor);
+
+    // Find the factory constructor and visit it
+    if (element is ClassElement) {
+      final constructor = element.constructors.firstWhere(
+        (c) => c.isFactory,
+        orElse: () => throw Exception('No factory constructor found'),
+      );
+      visitor.visitConstructorElement(constructor);
+    } else {
+      throw Exception('Element must be a class');
+    }
 
     // generate event class
     final eventClassName = '${visitor.className}Event';
@@ -29,15 +42,18 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
     // prevent duplicate event names
     if (eventNames.contains(eventName)) {
       throw Exception(
-          "Duplicate event '$eventName'. Each event must have a unique name.");
+        "Duplicate event '$eventName'. Each event must have a unique name.",
+      );
     }
     eventNames.add(eventName);
 
     classBuffer.writeln();
     classBuffer.writeln(
-        'class $eventClassName extends EventInfo<${visitor.paramsClassName}> {');
+      'class $eventClassName extends EventInfo<${visitor.paramsClassName}> {',
+    );
     classBuffer.writeln(
-        'const $eventClassName({required String streamId, required ${visitor.paramsClassName} params})');
+      'const $eventClassName({required String streamId, required ${visitor.paramsClassName} params})',
+    );
     classBuffer.writeln(': super(');
     classBuffer.writeln('streamId: streamId,');
     classBuffer.writeln("name: '$eventName',");
@@ -64,8 +80,7 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
 
     // final className = commandType.getDisplayString(withNullability: false);
     final genericClassType = getCommandParamType(commandType);
-    final paramsClassName =
-        genericClassType.getDisplayString(withNullability: false);
+    final paramsClassName = genericClassType.getDisplayString();
 
     return EventConfig(
       // commandClassName: className,
@@ -79,7 +94,7 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
   }
 
   bool canHaveGenerics(DartType type) {
-    final element = type.element2;
+    final element = type.element;
     if (element is ClassElement) {
       element.allSupertypes;
       return element.typeParameters.isNotEmpty;
@@ -88,8 +103,8 @@ class EventGenerator extends GeneratorForAnnotation<SynchronizedEvent> {
   }
 
   DartType getCommandParamType(DartType type) {
-    String commandName = type.getDisplayString(withNullability: false);
-    final element = type.element2;
+    String commandName = type.getDisplayString();
+    final element = type.element;
     if (element is ClassElement) {
       final superTypes = element.allSupertypes;
       if (superTypes.isEmpty) {
